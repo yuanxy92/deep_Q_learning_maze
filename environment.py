@@ -13,6 +13,9 @@ class MazeEnvironment:
         self.current_position = np.asarray(init_position)
         self.goal = goal
         self.maze = maze
+        self.maze_seen = np.zeros_like(maze)
+        self.seen_size = len(maze) // 4
+        self.maze_seen[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)] = self.maze[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)]
         
         self.visited = set()
         self.visited.add(tuple(self.current_position))
@@ -61,6 +64,9 @@ class MazeEnvironment:
         self.visited = set()
         self.visited.add(tuple(self.current_position))
 
+        self.maze_seen = np.zeros_like(self.maze)
+        self.maze_seen[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)] = self.maze[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)]
+
         return self.state()
     
     
@@ -92,11 +98,13 @@ class MazeEnvironment:
             reward = -1
         
         self.visited.add(tuple(self.current_position))
+        self.maze_seen[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)] = self.maze[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)]
+
         return [self.state(), reward, isgameon]
 
     # return the state to be feeded to the network
     def state(self):
-        state = copy.deepcopy(self.maze)
+        state = copy.deepcopy(self.maze_seen)
         state[tuple(self.current_position)] = 2
         return state
         
