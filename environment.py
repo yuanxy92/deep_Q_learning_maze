@@ -14,7 +14,7 @@ class MazeEnvironment:
         self.goal = goal
         self.maze = maze
         self.maze_seen = np.zeros_like(maze)
-        self.seen_size = len(maze) // 4
+        self.seen_size = len(maze) // 8
         self.maze_seen[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)] = self.maze[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)]
         
         self.visited = set()
