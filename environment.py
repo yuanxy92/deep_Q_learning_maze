@@ -69,6 +69,7 @@ class MazeEnvironment:
         self.visited = set()
         self.visited.add(tuple(self.current_position))
 
+        self.maze_seen = np.zeros_like(self.maze)
         r_s = max(self.current_position[0] - self.seen_size, 0)
         r_e = min(self.current_position[0] + self.seen_size, len(self.maze))
         c_s = max(self.current_position[1] - self.seen_size, 0)
