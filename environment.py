@@ -15,7 +15,12 @@ class MazeEnvironment:
         self.maze = maze
         self.maze_seen = np.zeros_like(maze)
         self.seen_size = len(maze) // 8
-        self.maze_seen[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)] = self.maze[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)]
+
+        r_s = max(self.current_position[0] - self.seen_size, 0)
+        r_e = min(self.current_position[0] + self.seen_size, len(maze))
+        c_s = max(self.current_position[1] - self.seen_size, 0)
+        c_e = min(self.current_position[1] + self.seen_size, len(maze))
+        self.maze_seen[r_s:r_e, c_s:c_e] = self.maze[r_s:r_e, c_s:c_e]
         
         self.visited = set()
         self.visited.add(tuple(self.current_position))
@@ -64,8 +69,11 @@ class MazeEnvironment:
         self.visited = set()
         self.visited.add(tuple(self.current_position))
 
-        self.maze_seen = np.zeros_like(self.maze)
-        self.maze_seen[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)] = self.maze[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)]
+        r_s = max(self.current_position[0] - self.seen_size, 0)
+        r_e = min(self.current_position[0] + self.seen_size, len(self.maze))
+        c_s = max(self.current_position[1] - self.seen_size, 0)
+        c_e = min(self.current_position[1] + self.seen_size, len(self.maze))
+        self.maze_seen[r_s:r_e, c_s:c_e] = self.maze[r_s:r_e, c_s:c_e]
 
         return self.state()
     
@@ -98,7 +106,11 @@ class MazeEnvironment:
             reward = -1
         
         self.visited.add(tuple(self.current_position))
-        self.maze_seen[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)] = self.maze[(self.current_position - self.seen_size):(self.current_position + self.seen_size), (self.current_position - self.seen_size):(self.current_position + self.seen_size)]
+        r_s = max(self.current_position[0] - self.seen_size, 0)
+        r_e = min(self.current_position[0] + self.seen_size, len(self.maze))
+        c_s = max(self.current_position[1] - self.seen_size, 0)
+        c_e = min(self.current_position[1] + self.seen_size, len(self.maze))
+        self.maze_seen[r_s:r_e, c_s:c_e] = self.maze[r_s:r_e, c_s:c_e]
 
         return [self.state(), reward, isgameon]
 
