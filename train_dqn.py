@@ -120,7 +120,9 @@ def Qloss(batch, net, gamma=0.99, device="cuda"):
 
 output_dir = './results/1'
 os.makedirs(output_dir, exist_ok=True)
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 maze = np.load('maze_generator/maze.npy')
+
 initial_position = [0,0]
 goal = [len(maze)-1, len(maze)-1]
 maze_env = MazeEnvironment(maze, initial_position, goal)
@@ -177,6 +179,9 @@ loss_log = []
 best_loss = 1e5
 
 running_loss = 0
+clear_line_num = 4
+for lineidx in range(clear_line_num):
+    print('#')
 
 for epoch in range(num_epochs):
     loss = 0
@@ -218,6 +223,8 @@ for epoch in range(num_epochs):
             torch.save(net.state_dict(), f'{output_dir}/best.torch')
             estop = epoch
     
+    for lineidx in range(clear_line_num):
+        print("\033[A\033[2K", end="\r")
     print('Epoch', epoch, '(number of moves ' + str(counter) + ')')
     print('Game', result)
     print('[' + '#'*(100-int(100*(1 - epoch/num_epochs))) +
@@ -225,4 +232,7 @@ for epoch in range(num_epochs):
     print('\t Average loss: ' + f'{loss:.5f}')
     if (epoch > 2000):
         print('\t Best average loss of the last 50 epochs: ' + f'{best_loss:.5f}' + ', achieved at epoch', estop)
-    clear_output(wait = True)
+        clear_line_num = 5
+    else:
+        clear_line_num = 4
+    
