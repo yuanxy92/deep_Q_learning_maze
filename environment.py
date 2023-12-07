@@ -154,3 +154,15 @@ class MazeEnvironment:
                 'rs', markersize = 4)
         plt.savefig(filename, dpi = 300, bbox_inches = 'tight')
         plt.show()
+
+    def draw_full(self, filename):
+        plt.figure()
+        im = plt.imshow(self.maze, interpolation='none', aspect='equal', cmap='Greys')
+        ax = plt.gca()
+
+        ax.plot(self.goal[1], self.goal[0],
+                'bs', markersize = 4)
+        ax.plot(self.current_position[1], self.current_position[0],
+                'rs', markersize = 4)
+        plt.savefig(filename, dpi = 300, bbox_inches = 'tight')
+        plt.show()

@@ -13,7 +13,7 @@ import torch.nn as nn
 import torch.optim as optim
 import collections
 
-from environment import MazeEnvironment
+from environment_multi import MazeEnvironment
 
 Transition = collections.namedtuple('Experience',
                                     field_names=['state', 'action',
@@ -118,16 +118,22 @@ def Qloss(batch, net, gamma=0.99, device="cuda"):
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
-output_dir = './results/1'
+output_dir = './results/3'
 os.makedirs(output_dir, exist_ok=True)
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 maze = np.load('maze_generator/maze.npy')
 
 initial_position = [0,0]
-goal = [len(maze)-1, len(maze)-1]
+goal1 = np.asarray([len(maze)-1, len(maze)-1])
+goal2 = np.asarray([17, 17])
+goal3 = np.asarray([18, 9])
+goal = []
+goal.append(goal1)
+goal.append(goal2)
+goal.append(goal3)
 maze_env = MazeEnvironment(maze, initial_position, goal)
 
-maze_env.draw(f'{output_dir}/maze_20.pdf')
+maze_env.draw_full(f'{output_dir}/maze_20.pdf')
 buffer_capacity = 10000
 buffer_start_size = 1000
 memory_buffer = ExperienceReplay(buffer_capacity)
@@ -206,10 +212,7 @@ for epoch in range(num_epochs):
         
         loss += loss_t.item()
     
-    if (agent.env.current_position == agent.env.goal).all():
-        result = 'won'
-    else:
-        result = 'lost'
+    result = agent.env.game_state
     
     if epoch%1000 == 0:
         agent.plot_policy_map(net, f'{output_dir}/sol_epoch_'+str(epoch)+'.pdf', [0.35,-0.3])
