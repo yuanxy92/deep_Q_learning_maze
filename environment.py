@@ -142,7 +142,7 @@ class MazeEnvironment:
     
     def draw(self, filename):
         plt.figure()
-        im = plt.imshow(self.maze, interpolation='none', aspect='equal', cmap='Greys');
+        im = plt.imshow(self.maze_seen, interpolation='none', aspect='equal', cmap='Greys');
         ax = plt.gca();
 
         plt.xticks([], [])

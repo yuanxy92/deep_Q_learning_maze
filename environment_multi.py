@@ -12,7 +12,6 @@ class MazeEnvironment:
         self.init_position = init_position
         self.current_position = np.asarray(init_position)
         self.goal = goal
-        self.num_goal = len(goal)
         self.maze = maze
         self.maze_seen = np.zeros_like(maze)
         self.seen_size = len(maze) // 8
@@ -143,7 +142,7 @@ class MazeEnvironment:
     
     def draw(self, filename):
         plt.figure()
-        im = plt.imshow(self.maze, interpolation='none', aspect='equal', cmap='Greys');
+        im = plt.imshow(self.maze_seen, interpolation='none', aspect='equal', cmap='Greys');
         ax = plt.gca();
 
         plt.xticks([], [])
