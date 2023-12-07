@@ -15,6 +15,9 @@ class MazeEnvironment:
         self.maze_seen = np.zeros_like(maze)
         self.seen_size = len(maze) // 2
         self.game_state = 'lost'
+        self.step = 0
+        self.goal_step_idx = []
+        self.goal_step_pos = []
 
         self.goal = goal
         self.num_goal = len(goal)
@@ -79,6 +82,10 @@ class MazeEnvironment:
         self.visited = set()
         self.visited.add(tuple(self.current_position))
 
+        self.step = 0
+        self.goal_step_idx = []
+        self.goal_step_pos = []
+        self.game_state = 'lost'
         self.maze_seen = np.zeros_like(self.maze)
         r_s = max(self.current_position[0] - self.seen_size, 0)
         r_e = min(self.current_position[0] + self.seen_size, len(self.maze))
@@ -101,9 +108,9 @@ class MazeEnvironment:
         
         # if the goals has been reached, the reward is 1
         if self.check_goals(self.current_position) == 1:
-            reward = reward + 10
+            reward = reward + 100
         if np.sum(self.mazegoal_seen) == 0:
-            reward = 10 * self.num_goal
+            reward = 100 * self.num_goal
             isgameon = False
             self.game_state = 'won'
             return [self.state(), reward, isgameon]
@@ -122,6 +129,7 @@ class MazeEnvironment:
         # reward is -1
         if self.is_state_valid(next_position):
             self.current_position = next_position
+            self.step = self.step + 1
         else:
             reward = -1
         
@@ -143,6 +151,8 @@ class MazeEnvironment:
     def check_goals(self, position):
         if self.mazegoal_seen[tuple(position)] == 1:
             self.mazegoal_seen[tuple(position)] = 0
+            self.goal_step_idx.append(self.step)
+            self.goal_step_pos.append(position)
             return 1
         else:
             return 0

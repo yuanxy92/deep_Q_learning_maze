@@ -138,7 +138,7 @@ buffer_capacity = 10000
 buffer_start_size = 1000
 memory_buffer = ExperienceReplay(buffer_capacity)
 
-from agent import Agent
+from agent_multi import Agent
 agent = Agent(maze = maze_env,
               memory_buffer = memory_buffer,
               use_softmax = True
@@ -225,11 +225,15 @@ for epoch in range(num_epochs):
             best_loss = running_loss
             torch.save(net.state_dict(), f'{output_dir}/best.torch')
             estop = epoch
-    
+
+    # print current states 
     for lineidx in range(clear_line_num):
         print("\033[A\033[2K", end="\r")
     print('Epoch', epoch, '(number of moves ' + str(counter) + ')')
-    print('Game', result)
+    print('Game', result, '  ', end='')
+    for idx in range(len(agent.env.goal_step_idx)):
+        print(f'step_idx: {agent.env.goal_step_idx[idx]}:({agent.env.goal_step_pos[idx][0]}, {agent.env.goal_step_pos[idx][1]})   ', end='')
+    print(' ')
     print('[' + '#'*(100-int(100*(1 - epoch/num_epochs))) +
           ' '*int(100*(1 - epoch/num_epochs)) + ']')
     print('\t Average loss: ' + f'{loss:.5f}')
