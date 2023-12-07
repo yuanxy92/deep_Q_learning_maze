@@ -118,7 +118,7 @@ def Qloss(batch, net, gamma=0.99, device="cuda"):
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
-output_dir = './results/1'
+output_dir = './results/2'
 os.makedirs(output_dir, exist_ok=True)
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 maze = np.load('maze_generator/maze.npy')
