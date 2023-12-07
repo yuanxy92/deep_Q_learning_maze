@@ -20,7 +20,7 @@ class Agent:
         self.num_act = 4
         self.use_softmax = use_softmax
         self.total_reward = 0
-        self.min_reward = -self.env.maze.size / 2
+        self.min_reward = -self.env.maze.size
         self.isgameon = True
 
         

@@ -58,6 +58,27 @@ class fc_nn(nn.Module):
         out = self.fc3(x)
         
         return out
+
+class fc_nn_multi(nn.Module):
+    def __init__(self, Ni, Nh1, Nh2, No = 4):
+        super().__init__()
+        
+        self.fc1_maze = nn.Linear(Ni, Nh1)
+        self.fc2_maze = nn.Linear(Nh1, Nh2)
+        self.fc1_goal = nn.Linear(Ni, Nh1)
+        self.fc2_goal = nn.Linear(Nh1, Nh2)
+        self.fc3 = nn.Linear(Nh2 * 2, No)
+        
+        self.act = nn.ReLU()
+        
+    def forward(self, x, classification = False, additional_out=False):
+        x_maze = self.act(self.fc1_maze(x[0]))
+        x_maze = self.act(self.fc2_maze(x_maze))
+        x_goal = self.act(self.fc1_goal(x[0]))
+        x_goal = self.act(self.fc2_goal(x_goal)) 
+        x_combine = torch.concat([x_maze, x_goal], dim=1)
+        out = self.fc3(x_combine)
+        return out
     
 class conv_nn(nn.Module):
     
@@ -144,7 +165,7 @@ agent = Agent(maze = maze_env,
               use_softmax = True
              )
 
-net = fc_nn(maze.size, maze.size, maze.size, 4)
+net = fc_nn_multi(maze.size, maze.size, maze.size, 4)
 optimizer = optim.Adam(net.parameters(), lr=1e-4)
 
 device = 'cuda'
