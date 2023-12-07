@@ -43,7 +43,7 @@ class Agent:
             
         
     def select_action(self, net, epsilon, device = 'cuda'):
-        state = torch.Tensor(self.env.state()).to(device).view(1,-1)
+        state = torch.Tensor(self.env.state()).to('cuda').view(1,2,-1)
         qvalues = net(state).cpu().detach().numpy().squeeze()
 
         # softmax sampling of the qvalues
@@ -72,7 +72,8 @@ class Agent:
 
             for free_cell in self.env.allowed_states:
                 self.env.current_position = np.asarray(free_cell)
-                qvalues = net(torch.Tensor(self.env.state()).view(1,-1).to('cuda'))
+                state = torch.Tensor(self.env.state()).to('cuda').view(1,2,-1)
+                qvalues = net(state)
                 action = int(torch.argmax(qvalues).detach().cpu().numpy())
                 policy = self.env.directions[action]
 

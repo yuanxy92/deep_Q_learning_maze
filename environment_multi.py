@@ -147,7 +147,7 @@ class MazeEnvironment:
         state1 = copy.deepcopy(self.maze_seen)
         state1[tuple(self.current_position)] = 2
         state2 = copy.deepcopy(self.mazegoal_seen)
-        return [state1,state2]
+        return np.stack([state1,state2], axis=0)
     
     def check_goals(self, position):
         if self.mazegoal_seen[tuple(position)] == 1:

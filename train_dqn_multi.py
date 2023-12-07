@@ -72,9 +72,9 @@ class fc_nn_multi(nn.Module):
         self.act = nn.ReLU()
         
     def forward(self, x, classification = False, additional_out=False):
-        x_maze = self.act(self.fc1_maze(x[0]))
+        x_maze = self.act(self.fc1_maze(x[:, 0, :]))
         x_maze = self.act(self.fc2_maze(x_maze))
-        x_goal = self.act(self.fc1_goal(x[0]))
+        x_goal = self.act(self.fc1_goal(x[:, 1, :]))
         x_goal = self.act(self.fc2_goal(x_goal)) 
         x_combine = torch.concat([x_maze, x_goal], dim=1)
         out = self.fc3(x_combine)
@@ -126,11 +126,11 @@ class conv_nn(nn.Module):
 def Qloss(batch, net, gamma=0.99, device="cuda"):
     states, actions, next_states, rewards, _ = batch
     lbatch = len(states)
-    state_action_values = net(states.view(lbatch,-1))
+    state_action_values = net(states.view(lbatch, 2, -1))
     state_action_values = state_action_values.gather(1, actions.unsqueeze(-1))
     state_action_values = state_action_values.squeeze(-1)
     
-    next_state_values = net(next_states.view(lbatch, -1))
+    next_state_values = net(next_states.view(lbatch, 2, -1))
     next_state_values = next_state_values.max(1)[0]
     
     next_state_values = next_state_values.detach()
@@ -141,7 +141,7 @@ def Qloss(batch, net, gamma=0.99, device="cuda"):
 
 output_dir = './results/3'
 os.makedirs(output_dir, exist_ok=True)
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 maze = np.load('maze_generator/maze.npy')
 
 initial_position = [0,0]
@@ -150,7 +150,7 @@ goal2 = np.asarray([17, 17])
 goal3 = np.asarray([18, 9])
 goal = []
 goal.append(goal1)
-goal.append(goal2)
+# goal.append(goal2)
 goal.append(goal3)
 maze_env = MazeEnvironment(maze, initial_position, goal)
 
