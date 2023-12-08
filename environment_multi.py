@@ -13,7 +13,7 @@ class MazeEnvironment:
         self.current_position = np.asarray(init_position)
         self.maze = maze
         self.maze_seen = np.zeros_like(maze)
-        self.seen_size = len(maze) // 2
+        self.seen_size = len(maze) // 4
         self.game_state = 'lost'
         self.step = 0
         self.goal_step_idx = []

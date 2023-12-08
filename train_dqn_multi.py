@@ -36,7 +36,11 @@ class ExperienceReplay:
         
         states, actions, next_states, rewards, isgameon = zip(*[self.memory[idx] 
                                                                 for idx in indices])
-        
+        states = np.stack(states, axis=0)
+        actions = np.stack(actions, axis=0)
+        next_states = np.stack(next_states, axis=0)
+        rewards = np.stack(rewards, axis=0)
+        isgameon = np.stack(isgameon, axis=0)
         return torch.Tensor(states).type(torch.float).to(device), \
                torch.Tensor(actions).type(torch.long).to(device), \
                torch.Tensor(next_states).to(device), \
@@ -150,7 +154,7 @@ goal2 = np.asarray([17, 17])
 goal3 = np.asarray([18, 9])
 goal = []
 goal.append(goal1)
-# goal.append(goal2)
+goal.append(goal2)
 goal.append(goal3)
 maze_env = MazeEnvironment(maze, initial_position, goal)
 
@@ -206,7 +210,9 @@ loss_log = []
 best_loss = 1e5
 
 running_loss = 0
-clear_line_num = 4
+clear_line_num = 5
+won_games = 0
+lost_games = 0
 for lineidx in range(clear_line_num):
     print('#')
 
@@ -252,15 +258,20 @@ for epoch in range(num_epochs):
         print("\033[A\033[2K", end="\r")
     print('Epoch', epoch, '(number of moves ' + str(counter) + ')')
     print('Game', result, '  ', end='')
+    if result == 'won':
+        won_games = won_games + 1
+    else:
+        lost_games = lost_games + 1
     for idx in range(len(agent.env.goal_step_idx)):
         print(f'step_idx: {agent.env.goal_step_idx[idx]}:({agent.env.goal_step_pos[idx][0]}, {agent.env.goal_step_pos[idx][1]})   ', end='')
     print(' ')
     print('[' + '#'*(100-int(100*(1 - epoch/num_epochs))) +
           ' '*int(100*(1 - epoch/num_epochs)) + ']')
     print('\t Average loss: ' + f'{loss:.5f}')
+    print(f'# of won games: {won_games}, # of lost games: {lost_games}')
     if (epoch > 2000):
         print('\t Best average loss of the last 50 epochs: ' + f'{best_loss:.5f}' + ', achieved at epoch', estop)
-        clear_line_num = 5
+        clear_line_num = 6
     else:
-        clear_line_num = 4
+        clear_line_num = 5
     
