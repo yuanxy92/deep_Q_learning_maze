@@ -27,7 +27,7 @@ class Agent:
     def make_a_move(self, net, epsilon, device = 'cuda'):
         action = self.select_action(net, epsilon, device)
         current_state = self.env.state()
-        next_state, reward, self.isgameon = self.env.state_update(action)
+        next_state, reward, self.isgameon = self.env.step(action)
         self.total_reward += reward
         
         if self.total_reward < self.min_reward:
@@ -85,4 +85,4 @@ class Agent:
             ax.plot(self.env.goal[1], self.env.goal[0],
                     'bs', markersize = 4)
             plt.savefig(filename, dpi = 300, bbox_inches = 'tight')
-            plt.show()
+            #plt.show()

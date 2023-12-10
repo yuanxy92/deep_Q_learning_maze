@@ -14,7 +14,7 @@ import torch.optim as optim
 import collections
 
 from environment_multi import MazeEnvironment
-
+print(torch.cuda.is_available())
 Transition = collections.namedtuple('Experience',
                                     field_names=['state', 'action',
                                                  'next_state', 'reward',
@@ -130,11 +130,11 @@ class conv_nn(nn.Module):
 def Qloss(batch, net, gamma=0.99, device="cuda"):
     states, actions, next_states, rewards, _ = batch
     lbatch = len(states)
-    state_action_values = net(states.view(lbatch, 2, -1))
+    state_action_values = net(states.view(lbatch, -1))
     state_action_values = state_action_values.gather(1, actions.unsqueeze(-1))
     state_action_values = state_action_values.squeeze(-1)
     
-    next_state_values = net(next_states.view(lbatch, 2, -1))
+    next_state_values = net(next_states.view(lbatch, -1))
     next_state_values = next_state_values.max(1)[0]
     
     next_state_values = next_state_values.detach()
@@ -145,7 +145,7 @@ def Qloss(batch, net, gamma=0.99, device="cuda"):
 
 output_dir = './results/3'
 os.makedirs(output_dir, exist_ok=True)
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+#os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 maze = np.load('maze_generator/maze.npy')
 
 initial_position = [0,0]
@@ -159,7 +159,7 @@ goal.append(goal3)
 maze_env = MazeEnvironment(maze, initial_position, goal)
 
 maze_env.draw_full(f'{output_dir}/maze_20.pdf')
-buffer_capacity = 10000
+buffer_capacity = 100000
 buffer_start_size = 1000
 memory_buffer = ExperienceReplay(buffer_capacity)
 
@@ -169,7 +169,8 @@ agent = Agent(maze = maze_env,
               use_softmax = True
              )
 
-net = fc_nn_multi(maze.size, maze.size, maze.size, 4)
+#net = fc_nn_multi(maze.size, maze.size, maze.size, 4)
+net = fc_nn(maze.size, maze.size, maze.size, 4)
 optimizer = optim.Adam(net.parameters(), lr=1e-4)
 
 device = 'cuda'
@@ -186,7 +187,7 @@ plt.plot(epsilon, color = 'orangered', ls = '--')
 plt.xlabel('Epochs')
 plt.ylabel('Epsilon')
 plt.savefig(f'{output_dir}/epsilon_profile.pdf', dpi = 300, bbox_inches = 'tight')
-plt.show()
+#plt.show()
 
 mp = []
 mpm = []
@@ -204,7 +205,7 @@ plt.xlabel('Epochs')
 plt.ylabel(r'max $p^r$ - min $p^r$')
 plt.legend()
 plt.savefig(f'{output_dir}/reset_policy.pdf', dpi = 300, bbox_inches = 'tight')
-plt.show()
+#plt.show()
 
 loss_log = []
 best_loss = 1e5
@@ -241,8 +242,8 @@ for epoch in range(num_epochs):
     
     result = agent.env.game_state
     
-    if epoch%1000 == 0:
-        agent.plot_policy_map(net, f'{output_dir}/sol_epoch_'+str(epoch)+'.pdf', [0.35,-0.3])
+    # if epoch%1000 == 0:
+    #     agent.plot_policy_map(net, f'{output_dir}/sol_epoch_'+str(epoch)+'.pdf', [0.35,-0.3])
     
     loss_log.append(loss)
     

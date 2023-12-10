@@ -27,11 +27,11 @@ class Agent:
     def make_a_move(self, net, epsilon, device = 'cuda'):
         action = self.select_action(net, epsilon, device)
         current_state = self.env.state()
-        next_state, reward, self.isgameon = self.env.state_update(action)
+        next_state, reward, self.isgameon = self.env.step(action)
         self.total_reward += reward
         
-        if self.total_reward < self.min_reward:
-            self.isgameon = False
+        # if self.total_reward < self.min_reward:
+        #     self.isgameon = False
         if not self.isgameon:
             self.total_reward = 0
         
@@ -43,7 +43,7 @@ class Agent:
             
         
     def select_action(self, net, epsilon, device = 'cuda'):
-        state = torch.Tensor(self.env.state()).to('cuda').view(1,2,-1)
+        state = torch.Tensor(self.env.state()).to(device).view(1,-1)
         qvalues = net(state).cpu().detach().numpy().squeeze()
 
         # softmax sampling of the qvalues
@@ -72,7 +72,7 @@ class Agent:
 
             for free_cell in self.env.allowed_states:
                 self.env.current_position = np.asarray(free_cell)
-                state = torch.Tensor(self.env.state()).to('cuda').view(1,2,-1)
+                state = torch.Tensor(self.env.state()).to('cuda').view(1,-1)
                 qvalues = net(state)
                 action = int(torch.argmax(qvalues).detach().cpu().numpy())
                 policy = self.env.directions[action]

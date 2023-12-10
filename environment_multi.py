@@ -2,12 +2,13 @@ import numpy as np
 import scipy.special as sp
 import matplotlib.pyplot as plt
 import copy
+import time
 
 class MazeEnvironment:    
     def __init__(self, maze, init_position, goal):
         x = len(maze)
         y = len(maze)
-        
+        self.steps = 0
         self.boundary = np.asarray([x, y])
         self.init_position = init_position
         self.current_position = np.asarray(init_position)
@@ -15,7 +16,6 @@ class MazeEnvironment:
         self.maze_seen = np.zeros_like(maze)
         self.seen_size = len(maze) // 4
         self.game_state = 'lost'
-        self.step = 0
         self.goal_step_idx = []
         self.goal_step_pos = []
 
@@ -71,6 +71,7 @@ class MazeEnvironment:
     # with probability prand the reset is random, otherwise
     # the reset policy at the given epsilon is used
     def reset(self, epsilon, prand = 0):
+        self.steps = 0
         if np.random.rand() < prand:
             idx = np.random.choice(len(self.allowed_states))
         else:
@@ -82,7 +83,6 @@ class MazeEnvironment:
         self.visited = set()
         self.visited.add(tuple(self.current_position))
 
-        self.step = 0
         self.goal_step_idx = []
         self.goal_step_pos = []
         self.game_state = 'lost'
@@ -97,7 +97,8 @@ class MazeEnvironment:
         return self.state()
     
     
-    def state_update(self, action):
+    def step(self, action):
+        self.steps += 1
         isgameon = True
         
         # each move costs -0.05
@@ -108,9 +109,9 @@ class MazeEnvironment:
         
         # if the goals has been reached, the reward is 1
         if self.check_goals(self.current_position) == 1:
-            reward = reward + 100
-        if np.sum(self.mazegoal_seen) == 0:
-            reward = 100 * self.num_goal
+            reward += 2
+        if np.sum(self.mazegoal_seen) == 3 * self.num_goal:
+            reward = 5 * self.num_goal
             isgameon = False
             self.game_state = 'won'
             return [self.state(), reward, isgameon]
@@ -123,15 +124,15 @@ class MazeEnvironment:
         # if the cell has been visited before, the reward is -0.2
         else:
             if tuple(self.current_position) in self.visited:
-                reward = -0.2
+                reward = -2
         
         # if the moves goes out of the maze or to a wall, the
         # reward is -1
         if self.is_state_valid(next_position):
             self.current_position = next_position
-            self.step = self.step + 1
+            #self.step = self.step + 1
         else:
-            reward = -1
+            reward = -2
         
         self.visited.add(tuple(self.current_position))
         r_s = max(self.current_position[0] - self.seen_size, 0)
@@ -140,20 +141,27 @@ class MazeEnvironment:
         c_e = min(self.current_position[1] + self.seen_size, len(self.maze))
         self.maze_seen[r_s:r_e, c_s:c_e] = self.maze[r_s:r_e, c_s:c_e]
 
+        if self.steps > 300:
+            isgameon = False
+
         return [self.state(), reward, isgameon]
 
     # return the state to be feeded to the network
     def state(self):
         state1 = copy.deepcopy(self.maze_seen)
         state1[tuple(self.current_position)] = 2
-        state2 = copy.deepcopy(self.mazegoal_seen)
-        return np.stack([state1,state2], axis=0)
+        # state2 = copy.deepcopy(self.mazegoal_seen)
+        # return np.stack([state1,state2], axis=0)
+        return state1
     
     def check_goals(self, position):
         if self.mazegoal_seen[tuple(position)] == 1:
-            self.mazegoal_seen[tuple(position)] = 0
-            self.goal_step_idx.append(self.step)
+            self.mazegoal_seen[tuple(position)] = 3
+            self.maze_seen[tuple(position)] = 3
+            self.goal_step_idx.append(self.steps)
             self.goal_step_pos.append(position)
+            self.visited = set()
+            self.visited.add(tuple(self.current_position))
             return 1
         else:
             return 0
@@ -190,6 +198,7 @@ class MazeEnvironment:
         ax.plot(self.current_position[1], self.current_position[0],
                 'rs', markersize = 4)
         plt.savefig(filename, dpi = 300, bbox_inches = 'tight')
+        time.sleep(0.5)
         plt.show()
 
     def draw_full(self, filename):
@@ -202,5 +211,5 @@ class MazeEnvironment:
         ax.plot(self.current_position[1], self.current_position[0],
                 'rs', markersize = 4)
         plt.savefig(filename, dpi = 300, bbox_inches = 'tight')
-        plt.show()
+        #plt.show()
 

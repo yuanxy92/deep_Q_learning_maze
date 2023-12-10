@@ -14,6 +14,7 @@ import torch.optim as optim
 import collections
 
 from environment import MazeEnvironment
+print(torch.cuda.is_available())
 
 Transition = collections.namedtuple('Experience',
                                     field_names=['state', 'action',
@@ -127,7 +128,7 @@ initial_position = [0,0]
 goal = [len(maze)-1, len(maze)-1]
 maze_env = MazeEnvironment(maze, initial_position, goal)
 
-maze_env.draw(f'{output_dir}/maze_20.pdf')
+#maze_env.draw(f'{output_dir}/maze_20.pdf')
 buffer_capacity = 10000
 buffer_start_size = 1000
 memory_buffer = ExperienceReplay(buffer_capacity)
@@ -141,7 +142,9 @@ agent = Agent(maze = maze_env,
 net = fc_nn(maze.size, maze.size, maze.size, 4)
 optimizer = optim.Adam(net.parameters(), lr=1e-4)
 
+
 device = 'cuda'
+
 batch_size = 24
 gamma = 0.9
 
@@ -189,7 +192,7 @@ for epoch in range(num_epochs):
     eps = epsilon[epoch]
     
     agent.isgameon = True
-    _ = agent.env.reset(eps)
+    _ = agent.env.reset(eps,prand=1)
     
     while agent.isgameon:
         agent.make_a_move(net, eps)

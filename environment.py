@@ -7,6 +7,7 @@ class MazeEnvironment:
     def __init__(self, maze, init_position, goal):
         x = len(maze)
         y = len(maze)
+        self.steps = 0
         
         self.boundary = np.asarray([x, y])
         self.init_position = init_position
@@ -58,6 +59,7 @@ class MazeEnvironment:
     # with probability prand the reset is random, otherwise
     # the reset policy at the given epsilon is used
     def reset(self, epsilon, prand = 0):
+        self.steps = 0
         if np.random.rand() < prand:
             idx = np.random.choice(len(self.allowed_states))
         else:
@@ -79,32 +81,33 @@ class MazeEnvironment:
         return self.state()
     
     
-    def state_update(self, action):
+    def step(self, action):
+        self.steps += 1
         isgameon = True
         
         # each move costs -0.05
-        reward = -0.05
+        reward = -1
         
         move = self.action_map[action]
         next_position = self.current_position + np.asarray(move)
         
         # if the goals has been reached, the reward is 1
         if (self.current_position == self.goal).all():
-                reward = 1
+                reward = 5
                 isgameon = False
                 return [self.state(), reward, isgameon]
             
         # if the cell has been visited before, the reward is -0.2
         else:
             if tuple(self.current_position) in self.visited:
-                reward = -0.2
+                reward = -2
         
         # if the moves goes out of the maze or to a wall, the
         # reward is -1
         if self.is_state_valid(next_position):
             self.current_position = next_position
         else:
-            reward = -1
+            reward = -2
         
         self.visited.add(tuple(self.current_position))
         r_s = max(self.current_position[0] - self.seen_size, 0)
@@ -112,6 +115,9 @@ class MazeEnvironment:
         c_s = max(self.current_position[1] - self.seen_size, 0)
         c_e = min(self.current_position[1] + self.seen_size, len(self.maze))
         self.maze_seen[r_s:r_e, c_s:c_e] = self.maze[r_s:r_e, c_s:c_e]
+
+        if self.steps > 150:
+            isgameon = False
 
         return [self.state(), reward, isgameon]
 
